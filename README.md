@@ -1,1 +1,1 @@
-# Swiftly - Base Extension
+# Swiftly - Addons Extension
