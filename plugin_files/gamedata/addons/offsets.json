@@ -1,0 +1,6 @@
+{
+    "SendNetMessage": {
+        "windows": 15,
+        "linux": 16
+    }
+}

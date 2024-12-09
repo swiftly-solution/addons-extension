@@ -17,3 +17,6 @@
 [submodule "vendor/LuaBridge"]
 	path = vendor/LuaBridge
 	url = https://github.com/swiftly-solution/LuaBridge
+[submodule "vendor/json"]
+	path = vendor/json
+	url = https://github.com/Tencent/rapidjson

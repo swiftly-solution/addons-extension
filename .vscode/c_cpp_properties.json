@@ -3,13 +3,14 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/build/baseext/windows-x86_64/**",
+                "${workspaceFolder}/build/addons.ext/windows-x86_64/**",
                 "${workspaceFolder}/alliedmodders/hl2sdk/**",
                 "${workspaceFolder}/alliedmodders/metamod/**",
                 "${workspaceFolder}/alliedmodders/metamod/core/**",
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/vendor/**",
-                "${workspaceFolder}/vendor/LuaBridge/Source/**"
+                "${workspaceFolder}/vendor/LuaBridge/Source/**",
+                "${workspaceFolder}/vendor/json/include/**"
             ],
             "defines": [
                 "_DEBUG",
@@ -26,13 +27,14 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/build/baseext/linux-x86_64/**",
+                "${workspaceFolder}/build/addons.ext/linux-x86_64/**",
                 "${workspaceFolder}/alliedmodders/hl2sdk/**",
                 "${workspaceFolder}/alliedmodders/metamod/**",
                 "${workspaceFolder}/alliedmodders/metamod/core/**",
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/vendor/**",
-                "${workspaceFolder}/vendor/LuaBridge/Source/**"
+                "${workspaceFolder}/vendor/LuaBridge/Source/**",
+                "${workspaceFolder}/vendor/json/include/**"
             ],
             "defines": [
                 "_DEBUG",
