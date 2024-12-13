@@ -94,35 +94,11 @@ bool AddonsExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, I
         return false;
     }
 
-    engine = (IVEngineServer *)ismm->VInterfaceMatch(ismm->GetEngineFactory(), INTERFACEVERSION_VENGINESERVER); 
-    if (!engine) { 
-        error = "Could not find interface: " INTERFACEVERSION_VENGINESERVER;
-        return false; 
-    }
-
-    g_pNetworkServerService = (INetworkServerService *)ismm->VInterfaceMatch(ismm->GetEngineFactory(), NETWORKSERVERSERVICE_INTERFACE_VERSION); 
-    if (!g_pNetworkServerService) { 
-        error = "Could not find interface: " NETWORKSERVERSERVICE_INTERFACE_VERSION;
-        return false; 
-    }
-
-    g_pFullFileSystem = (IFileSystem *)ismm->VInterfaceMatch(ismm->GetFileSystemFactory(), FILESYSTEM_INTERFACE_VERSION, 0); 
-    if (!g_pFullFileSystem) {
-        error = "Could not find interface: " FILESYSTEM_INTERFACE_VERSION;
-        return false;
-    }
-
-    server = (ISource2Server *)ismm->VInterfaceMatch(ismm->GetServerFactory(), INTERFACEVERSION_SERVERGAMEDLL, 0); 
-    if (!server) {
-        error = "Could not find interface: " INTERFACEVERSION_SERVERGAMEDLL;
-        return false;
-    }
-
-    gameclients = (IServerGameClients *)ismm->VInterfaceMatch(ismm->GetServerFactory(), INTERFACEVERSION_SERVERGAMECLIENTS, 0); 
-    if (!gameclients) {
-        error = "Could not find interface: " INTERFACEVERSION_SERVERGAMECLIENTS;
-        return false;
-    }
+    GET_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
+    GET_IFACE_CURRENT(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
+    GET_IFACE_ANY(GetFileSystemFactory, g_pFullFileSystem, IFileSystem, FILESYSTEM_INTERFACE_VERSION);
+    GET_IFACE_ANY(GetServerFactory, server, ISource2Server, INTERFACEVERSION_SERVERGAMEDLL);
+    GET_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 
     SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameServerSteamAPIActivated, server, this, &AddonsExtension::Hook_GameServerSteamAPIActivated, false);
     SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientConnect, gameclients, this, &AddonsExtension::Hook_ClientConnect, false);
