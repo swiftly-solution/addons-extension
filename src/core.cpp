@@ -3,6 +3,7 @@
 #include <tier0/basetypes.h>
 #include <fstream>
 #include <thread>
+#include <swiftly-ext/files.h>
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
@@ -69,14 +70,7 @@ void Addons::BuildAddonPath(std::string pszAddon, std::string& buffer)
     static CBufferStringGrowable<MAX_PATH> s_sWorkingDir;
     ExecuteOnce(g_pFullFileSystem->GetSearchPath("EXECUTABLE_PATH", GET_SEARCH_PATH_ALL, s_sWorkingDir, 1));
 
-    std::string str = s_sWorkingDir.Get();
-    std::vector<std::string> strSplit = explode(str, WIN_LINUX("\\", "/"));
-    strSplit.pop_back();
-    strSplit.pop_back();
-    strSplit.pop_back();
-    strSplit.push_back("csgo");
-
-    buffer = string_format("%s/steamapps/workshop/content/730/%s/%s.vpk", implode(strSplit, "/").c_str(), pszAddon.c_str(), pszAddon.c_str());
+    buffer = string_format("%ssteamapps/workshop/content/730/%s/%s.vpk", s_sWorkingDir.Get(), pszAddon.c_str(), pszAddon.c_str());
 }
 
 bool Addons::MountAddon(std::string pszAddon, bool addToTail)
@@ -354,7 +348,7 @@ void Addons::LoadAddons()
 {
     this->ClearAddons();
 
-    std::ifstream ifs("addons/swiftly/configs/addons.json");
+    std::ifstream ifs(GeneratePath("addons/swiftly/configs/addons.json"));
     if(!ifs.is_open()) {
         AddonsPrint("Failed to open 'addons/swiftly/configs/addons.json'.");
         return;
