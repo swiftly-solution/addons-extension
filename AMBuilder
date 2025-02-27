@@ -163,7 +163,7 @@ for sdk_target in MMSPlugin.sdk_targets:
     binary.compiler.cxxincludes += [
         os.path.join(builder.sourcePath, 'vendor'),
         os.path.join(builder.sourcePath, 'vendor', 'embedder', 'src'),
-        os.path.join(builder.sourcePath, 'vendor', 'LuaBridge', 'Source'),
+        os.path.join(builder.sourcePath, 'vendor', 'json', 'include'),
 
         os.path.join(sdk['path']),
         os.path.join(sdk['path'], 'public'),
