@@ -34,7 +34,7 @@ with open(os.path.join(builder.buildPath, 'pdblog.txt'), 'wt') as fp:
     fp.write(line.path + '\n')
 
 configs_folder = builder.AddFolder(os.path.join('addons', 'swiftly', 'configs'))
-builder.AddCopy(os.path.join(builder.sourcePath, 'plugin_files', 'configs', 'addons.json'), configs_folder)
+builder.AddCopy(os.path.join(builder.sourcePath, 'plugin_files', 'configs', 'addons.example.json'), configs_folder)
 
 gamedata_folder = builder.AddFolder(os.path.join('addons', 'swiftly', 'gamedata', 'addons'))
 builder.AddCopy(os.path.join(builder.sourcePath, 'plugin_files', 'gamedata', 'addons', 'offsets.json'), gamedata_folder)
