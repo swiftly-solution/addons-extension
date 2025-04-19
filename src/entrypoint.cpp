@@ -3,7 +3,6 @@
 #include <thread>
 #include <public/iserver.h>
 #include <steam/steam_gameserver.h>
-#include <swiftly-ext/hooks/NativeHooks.h>
 
 //////////////////////////////////////////////////////////////
 /////////////////        Core Variables        //////////////
@@ -14,7 +13,6 @@ SH_DECL_HOOK3_void(INetworkServerService, StartupServer, SH_NOATTRIB, 0, const G
 SH_DECL_HOOK6(IServerGameClients, ClientConnect, SH_NOATTRIB, 0, bool, CPlayerSlot, const char*, uint64, const char*, bool, CBufferString*);
 
 AddonsExtension g_Ext;
-CUtlVector<FuncHookBase *> g_vecHooks;
 
 CSteamGameServerAPIContext g_SteamAPI;
 IVEngineServer2* engine = nullptr;
@@ -29,15 +27,11 @@ Addons g_addons;
 /////////////////             Hooks            //////////////
 ////////////////////////////////////////////////////////////
 
-FuncHook<decltype(Hook_HostStateRequest)> THostStateRequest(Hook_HostStateRequest, "HostStateRequest");
-FuncHook<decltype(Hook_SendNetMessage)> TSendNetMessage(Hook_SendNetMessage, "engine2", "CServerSideClient", "SendNetMessage");
-
-void* Hook_HostStateRequest(void* a1, void** pRequest)
+dyno::ReturnAction HostStateRequestHook(dyno::CallbackType cbType, dyno::IHook& hook)
 {
-    if (g_addons.GetStatus() == false || g_addons.GetAddons().size() == 0)
-        return THostStateRequest(a1, pRequest);
+    if (g_addons.GetStatus() == false || g_addons.GetAddons().size() == 0) return dyno::ReturnAction::Ignored;
 
-    CUtlString* pszAddonString = (CUtlString*)(pRequest + 11);
+    CUtlString* pszAddonString = (CUtlString*)(hook.getArgument<void**>(1) + 11);
     auto v = explode(pszAddonString->Get(), ",");
     auto adns = g_addons.GetAddons();
 
@@ -49,20 +43,23 @@ void* Hook_HostStateRequest(void* a1, void** pRequest)
         g_addons.currentWorkshopMap.clear();
     }
     else {
-        if(v[0].empty()) pszAddonString->Format("%s", extra.c_str());
+        if (v[0].empty()) pszAddonString->Format("%s", extra.c_str());
         else pszAddonString->Format("%s,%s", v[0].c_str(), extra.c_str());
         g_addons.currentWorkshopMap = v[0];
     }
 
-    return THostStateRequest(a1, pRequest);
 }
 
-bool Hook_SendNetMessage(CServerSideClient* pClient, CNetMessage* pData, NetChannelBufType_t bufType)
+FunctionHook HostStateRequest("HostStateRequest", dyno::CallbackType::Pre, HostStateRequestHook, "pp", 'p');
+
+dyno::ReturnAction SendNetMessageHook(dyno::CallbackType cbType, dyno::IHook& hook)
 {
+    CServerSideClient* pClient = hook.getArgument<CServerSideClient*>(0);
+    CNetMessage* pData = hook.getArgument<CNetMessage*>(1);
     NetMessageInfo_t* info = pData->GetNetMessage()->GetNetMessageInfo();
 
     if (info->m_MessageId != net_SignonState || g_addons.GetStatus() == false || g_addons.GetAddons().size() == 0)
-        return TSendNetMessage(pClient, pData, bufType);
+        return dyno::ReturnAction::Ignored;
 
     auto pMsg = pData->ToPB<CNETMsg_SignonState>();
     if (pMsg->signon_state() == SIGNONSTATE_CHANGELEVEL)
@@ -77,22 +74,19 @@ bool Hook_SendNetMessage(CServerSideClient* pClient, CNetMessage* pData, NetChan
         pPendingClient->signon_timestamp = Plat_FloatTime();
     }
 
-    return TSendNetMessage(pClient, pData, bufType);
+    return dyno::ReturnAction::Handled;
 }
+
+VFunctionHook SendNetMessage("engine2", "CServerSideClient", "SendNetMessage", dyno::CallbackType::Pre, SendNetMessageHook, "ppi", 'b');
 
 //////////////////////////////////////////////////////////////
 /////////////////          Core Class          //////////////
 ////////////////////////////////////////////////////////////
 
 EXT_EXPOSE(g_Ext);
-bool AddonsExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, ISmmAPI* ismm, bool late)
+bool AddonsExtension::Load(std::string& error, SourceHook::ISourceHook* SHPtr, ISmmAPI* ismm, bool late)
 {
     SAVE_GLOBALVARS();
-
-    if(!InitializeHooks()) {
-        error = "Failed to initialize hooks.";
-        return false;
-    }
 
     GET_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
     GET_IFACE_CURRENT(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
@@ -106,7 +100,7 @@ bool AddonsExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, I
 
     g_addons.LoadAddons();
 
-    if(late)
+    if (late)
     {
         g_SteamAPI.Init();
         m_CallbackDownloadItemResult.Register(this, &AddonsExtension::OnAddonDownloaded);
@@ -162,15 +156,14 @@ bool AddonsExtension::Unload(std::string& error)
     SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameServerSteamAPIActivated, server, this, &AddonsExtension::Hook_GameServerSteamAPIActivated, false);
     SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientConnect, gameclients, this, &AddonsExtension::Hook_ClientConnect, false);
     SH_REMOVE_HOOK_MEMFUNC(INetworkServerService, StartupServer, g_pNetworkServerService, this, &AddonsExtension::Hook_StartupServer, true);
-    
-    UnloadHooks();
+
     return true;
 }
 
 void Addons::ToggleHooks()
 {
-    THostStateRequest.Disable();
-    TSendNetMessage.Disable();
+    HostStateRequest.Disable();
+    SendNetMessage.Disable();
 
     if (this->m_status) {
         if (!GetSignature("HostStateRequest"))
@@ -180,8 +173,8 @@ void Addons::ToggleHooks()
             return;
         }
 
-        THostStateRequest.Enable();
-        TSendNetMessage.Enable();
+        HostStateRequest.Enable();
+        SendNetMessage.Enable();
     }
 }
 

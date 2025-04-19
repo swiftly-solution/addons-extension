@@ -1,5 +1,4 @@
 #include "core.h"
-#include <swiftly-ext/hooks/FuncHook.h>
 #include <tier0/basetypes.h>
 #include <fstream>
 #include <thread>
@@ -62,7 +61,7 @@ void AddonsPrint(std::string str)
     g_SMAPI->ConPrintf("[Addons] %s\n", str.c_str());
 }
 
-void Addons::BuildAddonPath(std::string pszAddon, std::string& buffer)
+void Addons::BuildAddonPath(std::string pszAddon, std::string& buffer, bool legacy)
 {
     if (g_addons.GetStatus() == false || g_addons.GetAddons().size() == 0)
         return;
@@ -70,7 +69,7 @@ void Addons::BuildAddonPath(std::string pszAddon, std::string& buffer)
     static CBufferStringGrowable<MAX_PATH> s_sWorkingDir;
     ExecuteOnce(g_pFullFileSystem->GetSearchPath("EXECUTABLE_PATH", GET_SEARCH_PATH_ALL, s_sWorkingDir, 1));
 
-    buffer = string_format("%ssteamapps/workshop/content/730/%s/%s.vpk", s_sWorkingDir.Get(), pszAddon.c_str(), pszAddon.c_str());
+    buffer = string_format("%ssteamapps/workshop/content/730/%s/%s%s.vpk", s_sWorkingDir.Get(), pszAddon.c_str(), pszAddon.c_str(), legacy ? "" : "_dir");
 }
 
 bool Addons::MountAddon(std::string pszAddon, bool addToTail)
@@ -92,8 +91,15 @@ bool Addons::MountAddon(std::string pszAddon, bool addToTail)
 
     if (!g_pFullFileSystem->FileExists(path.c_str()))
     {
-        AddonsPrint(string_format("Addon %s was not found at %s.", pszAddon.c_str(), path.c_str()));
-        return false;
+        this->BuildAddonPath(pszAddon, path, true);
+        if (!g_pFullFileSystem->FileExists(path.c_str()))
+        {
+            AddonsPrint(string_format("Addon %s was not found at %s.", pszAddon.c_str(), path.c_str()));
+            return false;
+        }
+    }
+    else {
+        this->BuildAddonPath(pszAddon, path, true);
     }
 
     if (this->ExistsInVector<std::string>(this->mountedAddons, pszAddon))
@@ -349,7 +355,7 @@ void Addons::LoadAddons()
     this->ClearAddons();
 
     std::ifstream ifs(GeneratePath("addons/swiftly/configs/addons.json"));
-    if(!ifs.is_open()) {
+    if (!ifs.is_open()) {
         AddonsPrint("Failed to open 'addons/swiftly/configs/addons.json'.");
         return;
     }

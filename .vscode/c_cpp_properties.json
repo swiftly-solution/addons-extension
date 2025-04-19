@@ -10,7 +10,9 @@
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/vendor/**",
                 "${workspaceFolder}/vendor/LuaBridge/Source/**",
-                "${workspaceFolder}/vendor/json/include/**"
+                "${workspaceFolder}/vendor/json/include/**",
+                "${workspaceFolder}/vendor/swiftly-ext/hooks/**",
+                "${workspaceFolder}/vendor/swiftly-ext/hooks/dynohook/**"
             ],
             "defines": [
                 "_DEBUG",
@@ -34,7 +36,9 @@
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/vendor/**",
                 "${workspaceFolder}/vendor/LuaBridge/Source/**",
-                "${workspaceFolder}/vendor/json/include/**"
+                "${workspaceFolder}/vendor/json/include/**",
+                "${workspaceFolder}/vendor/swiftly-ext/hooks/**",
+                "${workspaceFolder}/vendor/swiftly-ext/hooks/dynohook/**"
             ],
             "defines": [
                 "_DEBUG",

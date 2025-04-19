@@ -15,16 +15,13 @@
 
 class CServerSideClient;
 
-void *Hook_HostStateRequest(void *a1, void **pRequest);
-bool Hook_SendNetMessage(CServerSideClient* pClient, CNetMessage* pData, NetChannelBufType_t bufType);
-
 struct DownloadInfo
 {
     uint64 bytesNow;
     uint64 totalBytes;
     uint64_t elapsedTime;
     uint64_t timestamp;
-    ProgressBar *progressBar;
+    ProgressBar* progressBar;
 };
 
 class Addons
@@ -59,7 +56,7 @@ public:
     uint32_t GetTimeout() { return this->timeout; }
     std::vector<std::string> GetAddons() { return this->addonsList; }
 
-    void BuildAddonPath(std::string pszAddon, std::string &buffer);
+    void BuildAddonPath(std::string pszAddon, std::string& buffer, bool legacy = false);
     bool MountAddon(std::string pszAddon, bool addToTail = false);
     bool UnmountAddon(std::string pszAddon);
     void DownloadAddon(std::string pszAddon, bool important = false, bool force = false);
@@ -72,7 +69,7 @@ public:
     bool AddAddon(std::string pszAddon, bool refresh = false);
     bool RemoveAddon(std::string pszAddon, bool refresh = false);
 
-    void OnAddonDownloaded(DownloadItemResult_t *result);
+    void OnAddonDownloaded(DownloadItemResult_t* result);
     void OnClientConnect(uint64 xuid);
 
     void ReloadMap();

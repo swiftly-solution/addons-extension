@@ -7,6 +7,8 @@
 
 #include <swiftly-ext/core.h>
 #include <swiftly-ext/extension.h>
+#include <swiftly-ext/hooks/function.h>
+#include <swiftly-ext/hooks/vfunction.h>
 
 #include <public/filesystem.h>
 
@@ -17,9 +19,9 @@ class GameSessionConfiguration_t
 class AddonsExtension : public SwiftlyExt
 {
 public:
-    bool Load(std::string& error, SourceHook::ISourceHook *SHPtr, ISmmAPI* ismm, bool late);
+    bool Load(std::string& error, SourceHook::ISourceHook* SHPtr, ISmmAPI* ismm, bool late);
     bool Unload(std::string& error);
-    
+
     void AllExtensionsLoaded();
     void AllPluginsLoaded();
 
