@@ -48,6 +48,7 @@ dyno::ReturnAction HostStateRequestHook(dyno::CallbackType cbType, dyno::IHook& 
         g_addons.currentWorkshopMap = v[0];
     }
 
+    return dyno::ReturnAction::Handled;
 }
 
 FunctionHook HostStateRequest("HostStateRequest", dyno::CallbackType::Pre, HostStateRequestHook, "pp", 'p');
