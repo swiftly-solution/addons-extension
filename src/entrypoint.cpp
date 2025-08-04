@@ -73,7 +73,7 @@ dyno::ReturnAction SendNetMessageHook(dyno::CallbackType cbType, dyno::IHook& ho
 #ifdef _WIN32
         0x1A8
 #else
-        0x198
+        0x1B0
 #endif
         );
 
