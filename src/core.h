@@ -9,11 +9,8 @@
 #include "entrypoint.h"
 #include "progressbar.h"
 #include "client.h"
-#include "classes/CServerSideClient.h"
 #include <networksystem/inetworkmessages.h>
 #include <networksystem/inetworkserializer.h>
-
-class CServerSideClient;
 
 struct DownloadInfo
 {
