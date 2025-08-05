@@ -5,6 +5,7 @@
 #include <steam/steam_gameserver.h>
 #include <steam/steamclientpublic.h>
 #include "networkbasetypes.pb.h"
+#include "sdk/CServerSideClient.h"
 
 //////////////////////////////////////////////////////////////
 /////////////////        Core Variables        //////////////
@@ -57,7 +58,7 @@ FunctionHook HostStateRequest("HostStateRequest", dyno::CallbackType::Pre, HostS
 
 dyno::ReturnAction SendNetMessageHook(dyno::CallbackType cbType, dyno::IHook& hook)
 {
-    void* pClient = hook.getArgument<void*>(0);
+    CServerSideClient* pClient = hook.getArgument<CServerSideClient*>(0);
     CNetMessage* pData = hook.getArgument<CNetMessage*>(1);
     NetMessageInfo_t* info = pData->GetNetMessage()->GetNetMessageInfo();
 
@@ -68,23 +69,14 @@ dyno::ReturnAction SendNetMessageHook(dyno::CallbackType cbType, dyno::IHook& ho
     if (pMsg->signon_state() == SIGNONSTATE_CHANGELEVEL)
         pMsg->set_addons(g_addons.currentWorkshopMap.empty() ? g_addons.GetAddons()[0].c_str() : g_addons.currentWorkshopMap.c_str());
 
-    CSteamID id = *reinterpret_cast<CSteamID*>(
-        ((uintptr_t)pClient) +
-#ifdef _WIN32
-        0x1A8
-#else
-        0x1B0
-#endif
-        );
-
     int idx;
-    ClientJoinInfo_t* pPendingClient = GetPendingClient(id.ConvertToUint64(), idx);
+    ClientJoinInfo_t* pPendingClient = GetPendingClient(pClient->GetClientSteamID().ConvertToUint64(), idx);
     if (pPendingClient)
     {
         pMsg->set_addons(g_addons.GetAddons()[pPendingClient->addon].c_str());
         pMsg->set_signon_state(SIGNONSTATE_CHANGELEVEL);
         pPendingClient->signon_timestamp = Plat_FloatTime();
-    }
+}
 
     return dyno::ReturnAction::Handled;
 }
